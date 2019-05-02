@@ -1,5 +1,6 @@
 ﻿using Nest;
 using System;
+using System.Collections.Generic;
 using System.Windows.Forms;
 
 namespace ESsearchTest
@@ -44,7 +45,7 @@ namespace ESsearchTest
 
             if (tbxName.Text == "")
             {
-                rtxSearchResult.Clear();
+                listView1.Clear();
             }
         }
 
@@ -52,28 +53,109 @@ namespace ESsearchTest
         {
             if (e.KeyChar == '\b')
             {
-                rtxSearchResult.Clear();
+                listView1.Clear();
             }
         }
 
         //Retrieve information based on search textbox value
         private void btnSearch_Click(object sender, EventArgs e)
         {
-            //Search query to retrieve info
+
+            FillList(listView1);
+         
+            
+        }
+
+        private void FillList(ListView component)
+        {
             var response = elasticClient.Search<Vessel>(s => s
-                .Index("vesselname")
-                .Type("allnames")
-                .Query(q => q.QueryString(qs => qs.Query(tbxName.Text + "*"))));
+            .Index("vesselname")
+            .Type("allnames")
+            .Query(q => q.QueryString(qs => qs.Query(tbxName.Text + "*"))));
+            BuildListView(component);
 
-            if (rtxSearchResult.Text != " ")
+            foreach(var hit in response.Hits)
             {
-                rtxSearchResult.Clear();
+                ListViewItem lvwItem = new ListViewItem();
 
-                foreach (var hit in response.Hits)
-                {
-                    rtxSearchResult.AppendText("VesselName: " + hit.Source.VesselName.ToString());
-                }
+                lvwItem.Text = hit.Source.cfr.ToString();
+                lvwItem.SubItems.Add(hit.Source.CountryCode).ToString();
+                lvwItem.SubItems.Add(hit.Source.VesselName).ToString();
+                lvwItem.SubItems.Add(hit.Source.PortCode).ToString();
+                lvwItem.SubItems.Add(hit.Source.PortName).ToString();
+                lvwItem.SubItems.Add(hit.Source.Loa).ToString();
+                lvwItem.SubItems.Add(hit.Source.TonRef).ToString();
+                lvwItem.SubItems.Add(hit.Source.PowerMain).ToString();
+                component.Items.Add(lvwItem);
+   
             }
         }
+
+        private void BuildListView(ListView component)
+        {
+            component.Columns.Clear();
+            component.Items.Clear();
+
+            component.View = System.Windows.Forms.View.Details;
+            component.FullRowSelect = true;
+            component.GridLines = true;
+            
+
+            ColumnHeader cfr, CountryCode, VesselName, PortCode, PortName, Loa, TonRef, PowerMain;
+            cfr = new ColumnHeader();
+            CountryCode = new ColumnHeader();
+            VesselName = new ColumnHeader();
+            PortCode = new ColumnHeader();
+            PortName = new ColumnHeader();
+            Loa = new ColumnHeader();
+            TonRef = new ColumnHeader();
+            PowerMain = new ColumnHeader();
+
+            cfr.Text = "CFR";
+            cfr.TextAlign = HorizontalAlignment.Left;
+            cfr.Width = 100;
+
+            CountryCode.Text = "Country Code";
+            CountryCode.TextAlign = HorizontalAlignment.Left;
+            CountryCode.Width = 100;
+
+            VesselName.Text = "Vessel Name";
+            VesselName.TextAlign = HorizontalAlignment.Left;
+            VesselName.Width = 150;
+
+            PortCode.Text = "Port Code";
+            PortCode.TextAlign = HorizontalAlignment.Left;
+            PortCode.Width = 80;
+
+            PortName.Text = "Port Name";
+            PortName.TextAlign = HorizontalAlignment.Left;
+            PortName.Width = 100;
+
+            Loa.Text = "Loa";
+            Loa.TextAlign = HorizontalAlignment.Left;
+            Loa.Width = 100;
+
+            TonRef.Text = "TonRef";
+            TonRef.TextAlign = HorizontalAlignment.Left;
+            TonRef.Width = 100;
+
+            PowerMain.Text = "PowerMain";
+            PowerMain.TextAlign = HorizontalAlignment.Left;
+            PowerMain.Width = 100;
+
+
+
+            component.Columns.Add(cfr);
+            component.Columns.Add(CountryCode);
+            component.Columns.Add(VesselName);
+            component.Columns.Add(PortCode);
+            component.Columns.Add(PortName);
+            component.Columns.Add(Loa);
+            component.Columns.Add(TonRef);
+            component.Columns.Add(PowerMain);
+
+        }
+
+
     }
 }
