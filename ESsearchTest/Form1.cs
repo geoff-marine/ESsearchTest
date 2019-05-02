@@ -18,7 +18,7 @@ namespace ESsearchTest
         private void Form1_Load(object sender, EventArgs e)
         {
             //Establishing connection with ES
-            connectionSettings = new ConnectionSettings(new Uri("http://10.11.1.70:9200")); //local PC            
+            connectionSettings = new ConnectionSettings(new Uri("http://10.11.1.70:9200"));          
             elasticClient = new ElasticClient(connectionSettings);
         }
 
@@ -27,9 +27,24 @@ namespace ESsearchTest
         {
             //Search query to retrieve info
             var response = elasticClient.Search<Vessel>(s => s
+                .Size(30)
                 .Index("vesselname")
                 .Type("allnames")
                 .Query(q => q.QueryString(qs => qs.Query(tbxName.Text + "*"))));
+                //.Query(q => q.MultiMatch(
+                //    m => m.Fields(
+                //        f => f.Fields(
+                //            p => p.VesselName,
+                //            p => p.ExactName)).Query(tbxName.Text + "*")
+                //            )));
+                //.Query(q => q
+                //.MultiMatch(m => m
+                //.Fields(f => f
+                //.Field(p => p.ExactName, 10)
+                //.Field(p => p.VesselName, 1)
+                //).Query(tbxName.Text)
+                //)));
+
 
             AutoCompleteStringCollection collection = new AutoCompleteStringCollection();
             foreach (var hit in response.Hits)
@@ -69,9 +84,19 @@ namespace ESsearchTest
         private void FillList(ListView component)
         {
             var response = elasticClient.Search<Vessel>(s => s
+            .Size(50)
             .Index("vesselname")
             .Type("allnames")
             .Query(q => q.QueryString(qs => qs.Query(tbxName.Text + "*"))));
+            //.Query(q => q
+            //.MultiMatch(m => m
+            //.Fields(f => f
+            //.Field(p => p.ExactName, 10)
+            //.Field(p => p.VesselName, 1)
+            //).Query(tbxName.Text)
+            //)));
+
+
             BuildListView(component);
 
             foreach(var hit in response.Hits)
