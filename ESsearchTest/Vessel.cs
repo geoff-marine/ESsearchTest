@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Nest;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,17 +7,22 @@ using System.Threading.Tasks;
 
 namespace ESsearchTest
 {
-    class Vessel
+    [ElasticsearchType(Name = "allnames")]
+    public class Vessel
     {
-        public string cfr { get; set; }
-        public string CountryCode { get; set; }
-        public string VesselName { get; set; }
-        public string ExactName { get; set; }
-        public string PortCode { get; set; }
-        public string PortName { get; set; }
-        public string Loa { get; set; }
-        public string Lbp { get; set; }
-        public string TonRef { get; set; }
-        public string PowerMain { get; set; }
+
+        [String(Name = "cfr")]  public string cfr { get; set; }
+
+        [String(Name = "CountryCode")] public string CountryCode { get; set; }
+        [String(Name = "VesselName")] public string VesselName { get; set; }
+
+        [String(Name = "ExactName")] public string ExactName { get; set; }
+        [String(Name = "PortCode")] public string PortCode { get; set; }
+        [String(Name = "PortName")] public string PortName { get; set; }
+        [String(Name = "Loa")] public string Loa { get; set; }
+        [String(Name = "Lbp")] public string Lbp { get; set; }
+        [String(Name = "TonRef")] public string TonRef { get; set; }
+        [String(Name = "PowerMain")] public string PowerMain { get; set; }
     }
+
 }

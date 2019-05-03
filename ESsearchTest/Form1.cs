@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
+using Elasticsearch.Net;
 
 namespace ESsearchTest
 {
@@ -9,6 +10,7 @@ namespace ESsearchTest
     {
         ConnectionSettings connectionSettings;
         ElasticClient elasticClient;
+        ElasticLowLevelClient lowLevelClient;
 
         public Form1()
         {
@@ -20,36 +22,32 @@ namespace ESsearchTest
             //Establishing connection with ES
             connectionSettings = new ConnectionSettings(new Uri("http://10.11.1.70:9200"));          
             elasticClient = new ElasticClient(connectionSettings);
+
+            var lowLevelclient = new ElasticLowLevelClient(connectionSettings);
         }
 
         //Get suggestion under search textbox
         private void tbxName_TextChanged(object sender, EventArgs e)
         {
             //Search query to retrieve info
+
             var response = elasticClient.Search<Vessel>(s => s
                 .Size(30)
                 .Index("vesselname")
                 .Type("allnames")
-                .Query(q => q.QueryString(qs => qs.Query(tbxName.Text + "*"))));
-                //.Query(q => q.MultiMatch(
-                //    m => m.Fields(
-                //        f => f.Fields(
-                //            p => p.VesselName,
-                //            p => p.ExactName)).Query(tbxName.Text + "*")
-                //            )));
-                //.Query(q => q
-                //.MultiMatch(m => m
-                //.Fields(f => f
-                //.Field(p => p.ExactName, 10)
-                //.Field(p => p.VesselName, 1)
-                //).Query(tbxName.Text)
-                //)));
+                //.Query(q => q.QueryString(qs => qs.Query(tbxName.Text + "*"))));
+
+                //.Query(q => q.QueryString(qs => qs.
+                //Fields(f => f.Field(fi => fi.VesselName)).Query(tbxName.Text + "*"))));
+
+                .Query(q => q.Match(m => m.Field(v => v.VesselName).Query(tbxName.Text))));
+
 
 
             AutoCompleteStringCollection collection = new AutoCompleteStringCollection();
-            foreach (var hit in response.Hits)
+            foreach (var hit in response.Documents)
             {
-                collection.Add(hit.Source.VesselName);
+                collection.Add(hit.VesselName);
             }
 
             tbxName.AutoCompleteSource = AutoCompleteSource.CustomSource;
@@ -77,8 +75,7 @@ namespace ESsearchTest
         {
 
             FillList(listView1);
-         
-            
+                   
         }
 
         private void FillList(ListView component)
@@ -88,13 +85,6 @@ namespace ESsearchTest
             .Index("vesselname")
             .Type("allnames")
             .Query(q => q.QueryString(qs => qs.Query(tbxName.Text + "*"))));
-            //.Query(q => q
-            //.MultiMatch(m => m
-            //.Fields(f => f
-            //.Field(p => p.ExactName, 10)
-            //.Field(p => p.VesselName, 1)
-            //).Query(tbxName.Text)
-            //)));
 
 
             BuildListView(component);
