@@ -25,30 +25,26 @@ namespace ESsearchTest
 
         }
 
-        //Get suggestion under search textbox
-        private void tbxName_TextChanged(object sender, EventArgs e)
+        private ISearchResponse<Vessel> esSearch()
         {
-            //Search query to retrieve info
-
             var response = elasticClient.Search<Vessel>(s => s
                 .Size(30)
                 .Index("vesselname")
-                .Type("allnames")            
+                .Type("allnames")
                 .Query(q => q
                .MultiMatch(c => c
-               .Fields(f => f.Field(p => p.VesselName).Field("ExactName^10"))               
+               .Fields(f => f.Field(p => p.VesselName).Field("ExactName^10"))
                .Query(tbxName.Text)) || q.Term("CountryCode^10", "IRL")));
-                //.Query(q => q.QueryString(qs => qs.Query(tbxName.Text + "*"))));
 
-                //.Query(q => q.QueryString(qs => qs.
-                //Fields(f => f.Field(fi => fi.VesselName)).Query(tbxName.Text + "*"))));
+            return response;
+        }
 
-                //.Query(q => q.Match(m => m.Field(v => v.VesselName).Query(tbxName.Text))));
-
-
+        //Get suggestion under search textbox
+        private void tbxName_TextChanged(object sender, EventArgs e)
+        {
 
             AutoCompleteStringCollection collection = new AutoCompleteStringCollection();
-            foreach (var hit in response.Documents)
+            foreach (var hit in esSearch().Documents)
             {
                 collection.Add(hit.VesselName);
             }
@@ -83,20 +79,10 @@ namespace ESsearchTest
 
         private void FillList(ListView component)
         {
-            var response = elasticClient.Search<Vessel>(s => s
-                .Size(50)
-                .Index("vesselname")
-                .Type("allnames")
-                
-                .Query(q => q
-               .MultiMatch(c => c
-               .Fields(f => f.Field(p => p.VesselName).Field("ExactName^10"))
-               .Query(tbxName.Text)) || q.Term("CountryCode^10", "IRL")));
-
 
             BuildListView(component);
 
-            foreach(var hit in response.Hits)
+            foreach(var hit in esSearch().Hits)
             {
                 ListViewItem lvwItem = new ListViewItem();
 
