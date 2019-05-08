@@ -23,7 +23,6 @@ namespace ESsearchTest
             connectionSettings = new ConnectionSettings(new Uri("http://10.11.1.70:9200"));          
             elasticClient = new ElasticClient(connectionSettings);
 
-            var lowLevelclient = new ElasticLowLevelClient(connectionSettings);
         }
 
         //Get suggestion under search textbox
@@ -34,13 +33,17 @@ namespace ESsearchTest
             var response = elasticClient.Search<Vessel>(s => s
                 .Size(30)
                 .Index("vesselname")
-                .Type("allnames")
+                .Type("allnames")            
+                .Query(q => q
+               .MultiMatch(c => c
+               .Fields(f => f.Field(p => p.VesselName).Field("ExactName^10"))               
+               .Query(tbxName.Text)) || q.Term("CountryCode^10", "IRL")));
                 //.Query(q => q.QueryString(qs => qs.Query(tbxName.Text + "*"))));
 
                 //.Query(q => q.QueryString(qs => qs.
                 //Fields(f => f.Field(fi => fi.VesselName)).Query(tbxName.Text + "*"))));
 
-                .Query(q => q.Match(m => m.Field(v => v.VesselName).Query(tbxName.Text))));
+                //.Query(q => q.Match(m => m.Field(v => v.VesselName).Query(tbxName.Text))));
 
 
 
@@ -81,10 +84,14 @@ namespace ESsearchTest
         private void FillList(ListView component)
         {
             var response = elasticClient.Search<Vessel>(s => s
-            .Size(50)
-            .Index("vesselname")
-            .Type("allnames")
-            .Query(q => q.QueryString(qs => qs.Query(tbxName.Text + "*"))));
+                .Size(50)
+                .Index("vesselname")
+                .Type("allnames")
+                
+                .Query(q => q
+               .MultiMatch(c => c
+               .Fields(f => f.Field(p => p.VesselName).Field("ExactName^10"))
+               .Query(tbxName.Text)) || q.Term("CountryCode^10", "IRL")));
 
 
             BuildListView(component);
