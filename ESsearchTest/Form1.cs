@@ -10,7 +10,6 @@ namespace ESsearchTest
     {
         ConnectionSettings connectionSettings;
         ElasticClient elasticClient;
-        ElasticLowLevelClient lowLevelClient;
 
         public Form1()
         {
@@ -28,13 +27,15 @@ namespace ESsearchTest
         private ISearchResponse<Vessel> esSearch()
         {
             var response = elasticClient.Search<Vessel>(s => s
-                .Size(30)
+                .Size(50)
                 .Index("vesselname")
                 .Type("allnames")
                 .Query(q => q
                .MultiMatch(c => c
                .Fields(f => f.Field(p => p.VesselName).Field("ExactName^10"))
-               .Query(tbxName.Text)) || q.Term("CountryCode^10", "IRL")));
+               .Query(tbxName.Text)
+               .Fuzziness(Fuzziness.Auto))
+               || q.Term(p => p.CountryCode, "IRL")));
 
             return response;
         }
