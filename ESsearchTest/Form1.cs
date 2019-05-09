@@ -32,7 +32,7 @@ namespace ESsearchTest
                 .Type("allnames")
                 .Query(q => q
                .MultiMatch(c => c
-               .Fields(f => f.Field(p => p.VesselName).Field("ExactName^10"))
+               .Fields(f => f.Field("VesselName.trigram").Field("ExactName^10"))
                .Query(tbxName.Text)
                .Fuzziness(Fuzziness.Auto))
                || q.Term(p => p.CountryCode, "IRL")));
